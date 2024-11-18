@@ -1,106 +1,114 @@
-const foods = [
-    { name: "Торт", description: "Утоление голода: 7 использований" },
-    { name: "Тушёный кролик", description: "Утоление голода: 12" },
-    { name: "Жареная говядина", description: "Утоление голода: 12,8" },
-    { name: "Жареная свинина", description: "Утоление голода: 12,8" },
-    { name: "Тыквенный пирог", description: "Утоление голода: 4,8" },
-    { name: "Тушёные грибы", description: "Утоление голода: 7,2" },
-    { name: "Свекольный суп", description: "Утоление голода: 7,2" },
-    { name: "Золотая морковь", description: "Утоление голода: 14,4" },
-    { name: "Жареная баранина", description: "Утоление голода: 9,6" },
-    { name: "Жареная курятина", description: "Утоление голода: 7,2" },
-    { name: "Жареный лосось", description: "Утоление голода: 9,6" },
-    { name: "Подозрительный суп", description: "Утоление голода: 7,2" },
-    { name: "Бутылочка мёда", description: "Утоление голода: 1,2" },
-    { name: "Печёный картофель", description: "Утоление голода: 6" },
-    { name: "Жареная крольчатина", description: "Утоление голода: 6" },
-    { name: "Жареная треска", description: "Утоление голода: 6" },
-    { name: "Хлеб", description: "Утоление голода: 6" },
-    { name: "Зачарованное золотое яблоко", description: "Утоление голода: 9,6" },
-    { name: "Золотое яблоко", description: "Утоление голода: 9,6" },
-    { name: "Яблоко", description: "Утоление голода: 2,4" },
-    { name: "Плод хоруса", description: "Утоление голода: 2,4" },
-    { name: "Гнилая плоть", description: "Утоление голода: 0,8" },
-    { name: "Морковь", description: "Утоление голода: 3,6" },
-    { name: "Сырая говядина", description: "Утоление голода: 1,8" },
-    { name: "Сырая крольчатина", description: "Утоление голода: 1,8" },
-    { name: "Сырая свинина", description: "Утоление голода: 1,8" },
-    { name: "Сладкие ягоды", description: "Утоление голода: 0,6" },
-    { name: "Светящиеся ягоды", description: "Утоление голода: 0,4" },
-    { name: "Ломтик арбуза", description: "Утоление голода: 1,2" },
-    { name: "Сырая курятина", description: "Утоление голода: 1,2" },
-    { name: "Сырая треска", description: "Утоление голода: 0,4" },
-    { name: "Сырой лосось", description: "Утоление голода: 0,4" },
-    { name: "Печенье", description: "Утоление голода: 0,4" },
-    { name: "Сырая баранина", description: "Утоление голода: 1,2" },
-    { name: "Паучий глаз", description: "Утоление голода: 3,2" },
-    { name: "Ядовитый картофель", description: "Утоление голода: 1,2" },
-    { name: "Свёкла", description: "Утоление голода: 1,2" },
-    { name: "Картофель", description: "Утоление голода: 0,6" },
-    { name: "Тропическая рыба", description: "Утоление голода: 0,2" },
-    { name: "Иглобрюх", description: "Утоление голода: 0,6" }
-];
+let rows = 30;
+let cols = 50;
+let board = Array.from({ length: rows }, () => Array(cols).fill(false));
+let intervalId;
+let generationCount = 0;
+let speed = 200;  // Начальная скорость (мс)
 
-const foodListContainer = document.querySelector('.food-list');
+const boardElement = document.getElementById('board');
+const generationCountElement = document.getElementById('generationCount');
 
-// Функция для создания бокса еды
-function createFoodBox(food, isEaten = false) {
-    const foodItem = document.createElement('div');
-    foodItem.classList.add('food-item');
-    
-    // Если еда съедена, добавляем класс
-    if (isEaten) {
-        foodItem.classList.add('eaten');
+function createBoard() {
+  boardElement.innerHTML = '';
+  board.forEach((row, rowIndex) => {
+    row.forEach((_, colIndex) => {
+      const cell = document.createElement('div');
+      cell.classList.add('cell');
+      cell.addEventListener('click', () => toggleCell(rowIndex, colIndex));
+      boardElement.appendChild(cell);
+    });
+  });
+  boardElement.style.gridTemplateColumns = `repeat(${cols}, 20px)`;
+}
+
+function toggleCell(row, col) {
+  board[row][col] = !board[row][col];
+  renderBoard();
+}
+
+function renderBoard() {
+  board.forEach((row, rowIndex) => {
+    row.forEach((cell, colIndex) => {
+      const cellElement = boardElement.children[rowIndex * cols + colIndex];
+      if (cell) {
+        cellElement.classList.add('alive');
+      } else {
+        cellElement.classList.remove('alive');
+      }
+    });
+  });
+}
+
+function startGame() {
+  if (intervalId) return;
+  intervalId = setInterval(nextGeneration, speed);
+  document.querySelector('button[onclick="startGame()"]').disabled = true;
+  document.querySelector('button[onclick="pauseGame()"]').disabled = false;
+}
+
+function pauseGame() {
+  clearInterval(intervalId);
+  intervalId = null;
+  document.querySelector('button[onclick="startGame()"]').disabled = false;
+  document.querySelector('button[onclick="pauseGame()"]').disabled = true;
+}
+
+function clearBoard() {
+  pauseGame();
+  board = Array.from({ length: rows }, () => Array(cols).fill(false));
+  renderBoard();
+  generationCount = 0;
+  generationCountElement.textContent = generationCount;
+}
+
+function increaseSpeed() {
+  if (speed > 50) {
+    speed -= 50;
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = setInterval(nextGeneration, speed);
     }
-
-    foodItem.innerHTML = `
-        <h2>${food.name}</h2>
-        <p>${food.description}</p>
-    `;
-
-    // Добавление обработчика клика
-    foodItem.addEventListener('click', () => {
-        foodItem.classList.toggle('eaten');
-        saveFoodState(); // Сохраняем состояние
-    });
-
-    return foodItem;
+  }
 }
 
-// Заполнение списка еды
-function renderFoodList() {
-    foodListContainer.innerHTML = '';
-    foods.forEach((food, index) => {
-        const isEaten = JSON.parse(localStorage.getItem(`food_${index}`)) || false;
-        const foodBox = createFoodBox(food, isEaten);
-        foodListContainer.appendChild(foodBox);
-    });
+function decreaseSpeed() {
+  speed += 50;
+  if (intervalId) {
+    clearInterval(intervalId);
+    intervalId = setInterval(nextGeneration, speed);
+  }
 }
 
-// Сохранение состояния еды в LocalStorage
-function saveFoodState() {
-    const foodItems = document.querySelectorAll('.food-item');
-    foodItems.forEach((item, index) => {
-        const isEaten = item.classList.contains('eaten');
-        localStorage.setItem(`food_${index}`, JSON.stringify(isEaten));
-    });
+
+function nextGeneration() {
+  const newBoard = board.map((row, rowIndex) => 
+    row.map((cell, colIndex) => {
+      const liveNeighbors = countLiveNeighbors(rowIndex, colIndex);
+      if (cell && (liveNeighbors === 2 || liveNeighbors === 3)) return true;
+      if (!cell && liveNeighbors === 3) return true;
+      return false;
+    })
+  );
+  board = newBoard;
+  renderBoard();
+  generationCount++;
+  generationCountElement.textContent = generationCount;
 }
 
-// Фильтрация по поисковому запросу
-const searchInput = document.getElementById('search');
-searchInput.addEventListener('input', (e) => {
-    const query = e.target.value.toLowerCase();
-    const foodItems = document.querySelectorAll('.food-item');
-    
-    foodItems.forEach(item => {
-        const foodName = item.querySelector('h2').textContent.toLowerCase();
-        if (foodName.includes(query)) {
-            item.style.display = 'block';
-        } else {
-            item.style.display = 'none';
-        }
-    });
-});
+function countLiveNeighbors(row, col) {
+  let count = 0;
+  for (let i = -1; i <= 1; i++) {
+    for (let j = -1; j <= 1; j++) {
+      if (i === 0 && j === 0) continue;
+      const newRow = row + i;
+      const newCol = col + j;
+      if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
+        count += board[newRow][newCol] ? 1 : 0;
+      }
+    }
+  }
+  return count;
+}
 
-// Инициализация
-renderFoodList();
+createBoard();
+renderBoard();

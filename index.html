@@ -1,21 +1,29 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Еда</title>
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Игра в Жизнь</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Виды еды в Minecraft</h1>
-        <input type="text" id="search" placeholder="Поиск по еде..." class="search-input">
-        <div class="food-list">
-            <!-- Список еды будет вставляться сюда с помощью JS -->
-        </div>
-    </div>
+  <h1>Игра в Жизнь</h1>
+  
+  <div class="controls">
+    <button onclick="startGame()">Запустить</button>
+    <button onclick="pauseGame()">Пауза</button>
+    <button onclick="clearBoard()">Очистить</button>
+    <button onclick="increaseSpeed()">Ускорить</button>
+    <button onclick="decreaseSpeed()">Замедлить</button>
 
-    <script src="script.js"></script>
+  </div>
+
+  <div id="board"></div>
+
+  <div class="info">
+    <p>Поколение: <span id="generationCount">0</span></p>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
